@@ -39,7 +39,6 @@ def plot_band_structure(k_vals, J_list, delta_list,vb,cb, limits,fout=''):
     return 0
 
 def plot_electric_pulse(t, E_t, limits,fout=''):
-
     fig, axs=plt.subplots(1, figsize=(7,5))
 
     axs.plot(t, E_t, label=f"Electric Field $E(t)$",color='black')
@@ -118,6 +117,64 @@ def plot_population_field(t_eval,electric_field,k_list,solutions,limits,fout='')
         plt.show()
     return 0
 
+def plot_singular_values(sigma,truncado,fout=''):
+    fig, axs=plt.subplots(1, figsize=(7,5))
+
+    axs.plot(sigma/sigma[0],'.',color='blue',label='Singular Values')
+
+    axs.axhline(y=truncado,ls='--',color='gray',label='cutoff')
+
+
+    axs.set_xlabel("index $i$",fontsize=15)
+    axs.set_ylabel(f"$\\sigma_i/\\sigma_0$",fontsize=15)
+    axs.set_yscale('log')
+
+    axs.legend(loc='best', fontsize=15,fancybox=True,framealpha=1.0)
+
+    axs.set_xlim(-0.1,len(sigma)+0.1)
+
+    axs.tick_params(axis="x", labelsize=15)
+    axs.tick_params(axis="y", labelsize=15)
+
+    axs.spines['top'].set_visible(False)
+    axs.spines['right'].set_visible(False)
+
+    if len(fout) > 0:
+        plt.savefig(fout+'.png', bbox_inches='tight', transparent=True)
+        plt.savefig(fout+'.pdf', bbox_inches='tight', transparent=True)
+    else:
+        plt.show()
+    return 0
+
+def plot_eigenvalues(mu,fout=''):
+    fig, axs=plt.subplots(1, figsize=(7,5))
+
+    axs.plot(mu.real,mu.imag,'.',color='red')
+
+    theta = np.linspace(0, 2 * np.pi, 300)
+    x = np.cos(theta)
+    y = np.sin(theta)
+    axs.plot(x, y, 'k--')
+    axs.plot([0.],[0.],'o',color='black')
+
+    axs.set_xlim(-1.2,1.2)
+    axs.set_ylim(-1.2,1.2)
+
+    axs.set_xlabel("$\\Re \\{ \\lambda_{{i}} \\}$",fontsize=15)
+    axs.set_ylabel("$\\Im \\{ \\lambda_{{i}} \\}$",fontsize=15)
+
+    axs.tick_params(axis="x", labelsize=15)
+    axs.tick_params(axis="y", labelsize=15)
+
+    axs.spines['top'].set_visible(False)
+    axs.spines['right'].set_visible(False)
+
+    if len(fout) > 0:
+        plt.savefig(fout+'.png', bbox_inches='tight', transparent=True)
+        plt.savefig(fout+'.pdf', bbox_inches='tight', transparent=True)
+    else:
+        plt.show()
+    return 0
 
 # Function 3: Density matrix evolution
 def plot_density_matrix_evolution(J, k_list, delta, sigma, E0):

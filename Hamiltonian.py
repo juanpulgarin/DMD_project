@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.integrate import solve_ivp
+import scipy.linalg as LA
 
 #========================================================================================
 #============================      System      ==========================================
-
 def eps_vb(k, J, delta):
     return  2. * J * np.cos(k) - 2. * J - delta / 2.
 
@@ -15,7 +15,6 @@ def delta_epsilon(k, J, delta):
 
 #========================================================================================
 #============================   Light-Matter   ==========================================
-
 def D(k):
     return k
 
@@ -50,3 +49,37 @@ def rhs(t, y, k, J, delta, sigma, E0, ω=0,case=1):
 #========================================================================================
 #====================================  DMD ==============================================
 
+def perform_dmd(X, Xp, t, r):
+    U, S, Vh = np.linalg.svd(X, full_matrices=False)
+
+    U_r, S_r, Vh_r = U[:, :r], np.diag(S[:r]), Vh[:r, :]
+    A_tilde = U_r.T @ Xp @ Vh_r.T @ np.linalg.inv(S_r)
+    eigvals, W = np.linalg.eig(A_tilde)
+
+
+    Phi = Xp @ Vh_r.T @ np.linalg.inv(S_r) @ W
+
+
+    dt = t[1] - t[0]
+    omega = np.log(eigvals) / dt
+    b = np.linalg.pinv(Phi) @ X[:, 0]
+    time_dynamics = np.array([b * np.exp(omega * T) for T in t]).T
+    X_dmd = Phi @ time_dynamics
+    #return eigvals, X_dmd.real
+    return eigvals, Phi, r, S
+
+def DMD(X, Y,orden_truncado=-1.5, truncate=True,correction=True):
+    U2,Sig2,Vh2 = LA.svd(X, full_matrices=False) # SVD of input matrix
+
+    if truncate==True:
+
+        r = np.where(np.log10(Sig2/Sig2[0])<=orden_truncado)[0][0]
+
+    U = U2[:,:r]
+    Sig = np.diag(Sig2)[:r,:r]
+    V = Vh2.conj().T[:,:r]
+    Atil = np.dot(np.dot(np.dot(U.conj().T, Y), V), LA.inv(Sig)) # build A tilde
+    mu,W = LA.eig(Atil)
+
+    Phi = np.dot(np.dot(np.dot(Y, V), LA.inv(Sig)), W) # build DMD modes
+    return mu, Phi, r, Sig2
