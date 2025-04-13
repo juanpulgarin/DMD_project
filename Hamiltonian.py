@@ -69,12 +69,14 @@ def perform_dmd(X, Xp, t, r):
 
 
 
-def DMD(X, Y, orden_truncado=-1.5, truncate=True,correction=True):
+def DMD(X, Y, power, orden_truncado, truncate=True, correction=True):
     U2,Sig2,Vh2 = LA.svd(X, full_matrices=False) # SVD of input matrix
 
     if truncate==True:
-
         r = np.where(np.log10(Sig2/Sig2[0])<=orden_truncado)[0][0]
+    
+    if power==False:
+        r=orden_truncado
 
     U = U2[:,:r]
     Sig = np.diag(Sig2)[:r,:r]

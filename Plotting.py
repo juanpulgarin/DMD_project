@@ -121,13 +121,13 @@ def plot_population_field(Title, t_eval,electric_field,k_list,solutions,limits,f
     else:
         plt.show()
     return 0
-
-def plot_singular_values(sigma,truncado,fout=''):
+"""
+def plot_singular_values(sigma,cutoff,power, fout=''):
     fig, axs=plt.subplots(1, figsize=(7,5))
 
     axs.plot(sigma/sigma[0],'.',color='blue',label='Singular Values')
 
-    axs.axhline(y=truncado,ls='--',color='gray',label='cutoff')
+    axs.axhline(y=cutoff,ls='--',color='gray',label='cutoff')
 
 
     axs.set_xlabel("index $i$",fontsize=15)
@@ -149,6 +149,42 @@ def plot_singular_values(sigma,truncado,fout=''):
         plt.savefig(fout+'.pdf', bbox_inches='tight', transparent=True)
     else:
         plt.show()
+    return 0
+
+"""
+
+def plot_singular_values(sigma, cutoff, power, fout=''):
+    fig, axs = plt.subplots(1, figsize=(7, 5))
+
+    axs.plot(sigma / sigma[0], '.', color='blue', label='Singular Values')
+    axs.set_xlabel("index $i$", fontsize=15)
+    axs.set_ylabel(f"$\\sigma_i/\\sigma_0$", fontsize=15)
+    axs.set_yscale('log')
+    axs.set_xlim(-0.1, len(sigma) + 0.1)
+
+    if power:
+        axs.axhline(y=cutoff, ls='--', color='gray', label='cutoff')
+    else:
+        if 0 <= cutoff < len(sigma):
+            axs.axhline(y=sigma[cutoff] / sigma[0], ls='--', color='gray',
+                        label=f'cutoff at $i={cutoff}$')
+        else:
+            print(f"Warning: cutoff index {cutoff} is out of range.")
+
+    axs.legend(loc='best', fontsize=15, fancybox=True, framealpha=1.0)
+
+    axs.tick_params(axis="x", labelsize=15)
+    axs.tick_params(axis="y", labelsize=15)
+
+    axs.spines['top'].set_visible(False)
+    axs.spines['right'].set_visible(False)
+
+    if len(fout) > 0:
+        plt.savefig(fout + '.png', bbox_inches='tight', transparent=True)
+        plt.savefig(fout + '.pdf', bbox_inches='tight', transparent=True)
+    else:
+        plt.show()
+
     return 0
 
 def plot_eigenvalues(mu,fout=''):
