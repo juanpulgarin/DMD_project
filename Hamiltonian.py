@@ -73,7 +73,7 @@ def DMD(X, Y,orden_truncado=-1.5, truncate=True,correction=True):
 
     if truncate==True:
 
-        r = np.where(np.log10(Sig2/Sig2[0])<=orden_truncado)[0][0]
+        r = np.where(np.log10(Sig2/Sig2[0])>orden_truncado)[0][-1] -1
 
     U = U2[:,:r]
     Sig = np.diag(Sig2)[:r,:r]
@@ -81,5 +81,6 @@ def DMD(X, Y,orden_truncado=-1.5, truncate=True,correction=True):
     Atil = np.dot(np.dot(np.dot(U.conj().T, Y), V), LA.inv(Sig)) # build A tilde
     mu,W = LA.eig(Atil)
 
-    Phi = np.dot(np.dot(np.dot(Y, V), LA.inv(Sig)), W) # build DMD modes
+    S_inv = np.diag(Sig2 / (Sig2**2 + 0.000001))[:r,:r]
+    Phi = np.dot(np.dot(np.dot(Y, V), S_inv), W) # build DMD modes
     return mu, Phi, r, Sig2
