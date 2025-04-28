@@ -68,12 +68,16 @@ def perform_dmd(X, Xp, t, r):
     #return eigvals, X_dmd.real
     return eigvals, Phi, r, S
 
-def DMD(X, Y,orden_truncado=-1.5, truncate=True,correction=True):
+def DMD(X, Y,orden_truncado=[0,-1.5], truncate=True,correction=True):
     U2,Sig2,Vh2 = LA.svd(X, full_matrices=False) # SVD of input matrix
 
     if truncate==True:
-
-        r = np.where(np.log10(Sig2/Sig2[0])>orden_truncado)[0][-1] -1
+        if orden_truncado[0]==0:
+            r = np.where( np.log10(Sig2/Sig2[0])>orden_truncado[1] )[0][-1] -1
+        if orden_truncado[0]==1:
+            r = orden_truncado[1]
+    else:
+        r = len(Sig2)
 
     U = U2[:,:r]
     Sig = np.diag(Sig2)[:r,:r]
