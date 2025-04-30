@@ -10,7 +10,6 @@ def custom_hankel_embedding(X, delay):
     ])
     return hankel_matrix
 
-
 def perform_dmd(H, rank=None, d=1, dt=1):
     #print(np.shape(H))
     X1 = H[:, :-1]
@@ -31,8 +30,8 @@ def perform_dmd(H, rank=None, d=1, dt=1):
     A_tilde = U_r.T @ X2 @ Vh_r.T @ Sigma_inv
     eigvals, W = LA.eig(A_tilde)
     Phi = X2 @ Vh_r.T @ Sigma_inv @ W
-    if d > 1:
-        Φ = np.average( Phi.reshape(d,Phi.shape[0] // d, Phi.shape[1],),axis=0,)
+    #if d > 1:
+    Φ = np.average( Phi.reshape(d,Phi.shape[0] // d, Phi.shape[1],),axis=0,)
 
 
     return S,eigvals,Phi, Φ
@@ -46,18 +45,20 @@ def perform_dmd(H, rank=None, d=1, dt=1):
     #X_dmd = Phi @ time_dynamics
     #return eigvals, Phi, X_dmd.real, timesteps
 
-def Dynamics(H,Eigvals,Φ,nt,d):
+def Dynamics(H,Eigvals,Modes,nt,d):
     x1=H[:,0]
+
+    #if d > 1:
+    Φ = np.average( Modes.reshape(d,Modes.shape[0] // d, Modes.shape[1],),axis=0,)
 
     time_steps = np.linspace(0,nt-d,nt-d+1,dtype=int)
     temp = np.repeat( Eigvals[:, None], time_steps.shape[0], axis=1 )
     tpow = ( time_steps - 0 ) / ( time_steps[1] - time_steps[0] )
 
-    amplitudes = LA.pinv(Φ) @ x1
+    amplitudes = LA.pinv(Modes) @ x1
     dynamics = np.power(temp, tpow) * amplitudes[:, None]
 
     return temp, amplitudes, dynamics , np.dot(Φ,dynamics)
-
 
 def LEAST_OUTER(D, Phi, mu, tspan, dt, r):
     # Get dimensions

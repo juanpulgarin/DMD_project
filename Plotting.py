@@ -6,7 +6,7 @@ import Hamiltonian as Hamilton
 import constants as cst
 
 def plot_band_structure(k_vals, J_list, delta_list,vb,cb, limits,fout=''):
-    fig, axs=plt.subplots(1, figsize=(7,5))
+    fig, axs=plt.subplots(1, figsize=(6,4))
 
     param_pairs = [(J, delta) for J in J_list for delta in delta_list]
     colors = cm.get_cmap('tab10', len(param_pairs))
@@ -39,7 +39,7 @@ def plot_band_structure(k_vals, J_list, delta_list,vb,cb, limits,fout=''):
     return 0
 
 def plot_electric_pulse(t, E_t, limits,fout=''):
-    fig, axs=plt.subplots(1, figsize=(7,5))
+    fig, axs=plt.subplots(1, figsize=(6,4))
 
     axs.plot(t, E_t, label=f"Electric Field $E(t)$",color='black')
 
@@ -118,7 +118,7 @@ def plot_population_field(t_eval,electric_field,k_list,solutions,limits,fout='')
     return 0
 
 def plot_singular_values(sigma,truncado,fout=''):
-    fig, axs=plt.subplots(1, figsize=(7,5))
+    fig, axs=plt.subplots(1, figsize=(6,4))
 
     axs.plot(sigma/sigma[0],'.',color='blue',label='Singular Values')
 
@@ -147,7 +147,7 @@ def plot_singular_values(sigma,truncado,fout=''):
     return 0
 
 def plot_eigenvalues(mu,fout=''):
-    fig, axs=plt.subplots(1, figsize=(7,5))
+    fig, axs=plt.subplots(1, figsize=(6,4))
 
     axs.plot(mu.real,mu.imag,'.',color='red')
 
@@ -160,8 +160,8 @@ def plot_eigenvalues(mu,fout=''):
     axs.set_xlim(-1.2,1.2)
     axs.set_ylim(-1.2,1.2)
 
-    axs.set_xlabel("$\\Re \\{ \\lambda_{{i}} \\}$",fontsize=15)
-    axs.set_ylabel("$\\Im \\{ \\lambda_{{i}} \\}$",fontsize=15)
+    axs.set_xlabel(r"$\Re\{\lambda_{i}\}$",fontsize=15)
+    axs.set_ylabel(r"$\Re\{\lambda_{i}\}$",fontsize=15)
 
     axs.tick_params(axis="x", labelsize=15)
     axs.tick_params(axis="y", labelsize=15)
@@ -175,6 +175,111 @@ def plot_eigenvalues(mu,fout=''):
     else:
         plt.show()
     return 0
+
+def plot_amplitudes_b(amplitudes_costum,fout=''):
+    fig, axs=plt.subplots(1, figsize=(6,4))
+
+
+    for i in range(len(amplitudes_costum)):
+        axs.plot(amplitudes_costum[i].real, amplitudes_costum[i].imag, 'o',label=f"$b_{i+1}$")
+
+    axs.legend(loc='best', fontsize=15,fancybox=True,framealpha=1.0)
+
+    axs.set_xlabel(r"$\Re \{ b_{i} \}$",fontsize=15)
+    axs.set_ylabel(r"$\Im \{ b_{i} \}$",fontsize=15)
+
+    axs.tick_params(axis="x", labelsize=15)
+    axs.tick_params(axis="y", labelsize=15)
+
+    axs.spines['top'].set_visible(False)
+    axs.spines['right'].set_visible(False)
+
+    if len(fout) > 0:
+        plt.savefig(fout+'.png', bbox_inches='tight', transparent=True)
+        plt.savefig(fout+'.pdf', bbox_inches='tight', transparent=True)
+    else:
+        plt.show()
+    return 0
+
+def plot_modes_vs_time():
+    fig, axs=plt.subplots(1, figsize=(6,4))
+
+def plot_modes_vs_grid(Φ,index,limits,kx,ky=None,dimension=1,fout=''):
+    fig, axs=plt.subplots(1, figsize=(6,4))
+
+    if dimension==1:
+        axs.plot(kx,Φ[:,index].real,color='blue',label=r"$\Re \{ \Phi_{{index+1}} \}$")
+        axs.plot(kx,Φ[:,index].imag,color='red',label=r"$\Im \{ \Phi_{{index+1}} \}$")
+
+        axs.legend(loc='best', fontsize=15,fancybox=True,framealpha=1.0)
+
+        axs.set_xlim(limits[0,0],limits[0,1])
+        axs.set_ylim(limits[1,0],limits[1,1])
+
+
+        axs.set_xlabel(f"$k$ (au)",fontsize=15)
+        axs.set_ylabel("Amplitude (au)",fontsize=15)
+
+        axs.tick_params(axis="x", labelsize=15)
+        axs.tick_params(axis="y", labelsize=15)
+
+        axs.spines['top'].set_visible(False)
+        axs.spines['right'].set_visible(False)
+
+        if len(fout) > 0:
+            plt.savefig(fout+'.png', bbox_inches='tight', transparent=True)
+            plt.savefig(fout+'.pdf', bbox_inches='tight', transparent=True)
+
+    if dimension==2:
+        vmax = np.max(Φ[:,:,index].real)
+        vmin = -vmax
+
+        im = axs.imshow(Φ[:,:,index].real, extent=(kx[0],kx[-1],ky[0],ky[-1]),\
+                   #cmap='seismic',aspect='auto',interpolation='spline36')
+                   cmap=plt.cm.seismic,aspect='auto',interpolation='bicubic',\
+                    vmin=vmin, vmax=vmax)
+
+
+        axs.set_xlim(limits[0,0],limits[0,1])
+        axs.set_ylim(limits[1,0],limits[1,1])
+
+        axs.set_title(r"$\Re \{ \Phi_{i} \}$",fontsize=15)
+        axs.set_xlabel(f'$k_x$ (au)',fontsize=15)
+        axs.set_ylabel(f'$k_y$ (au)',fontsize=15)
+
+        cs = fig.colorbar(im)
+
+        cs.axs.tick_params(labelsize=15)
+
+        if len(fout) > 0:
+            plt.savefig(fout+'_real.png', bbox_inches='tight', transparent=True)
+            plt.savefig(fout+'_real.pdf', bbox_inches='tight', transparent=True)
+
+        fig, axs=plt.subplots(1, figsize=(6,4))
+
+        vmax = np.max(Φ[:,:,index].imag)
+        vmin = -vmax
+
+        im = axs.imshow(Φ[:,:,index].imag, extent=(kx[0],kx[-1],ky[0],ky[-1]),\
+                   #cmap='seismic',aspect='auto',interpolation='spline36')
+                   cmap=plt.cm.seismic,aspect='auto',interpolation='bicubic',\
+                    vmin=vmin, vmax=vmax)
+
+
+        axs.set_xlim(limits[0,0],limits[0,1])
+        axs.set_ylim(limits[1,0],limits[1,1])
+
+        axs.set_title(r"$\Im \{ \Phi_{i} \}$",fontsize=15)
+        axs.set_xlabel(f'$k_x$ (au)',fontsize=15)
+        axs.set_ylabel(f'$k_y$ (au)',fontsize=15)
+
+        cs = fig.colorbar(im)
+
+        cs.axs.tick_params(labelsize=15)
+
+        if len(fout) > 0:
+            plt.savefig(fout+'_imag.png', bbox_inches='tight', transparent=True)
+            plt.savefig(fout+'_imag.pdf', bbox_inches='tight', transparent=True)
 
 # Function 3: Density matrix evolution
 def plot_density_matrix_evolution(J, k_list, delta, sigma, E0):
