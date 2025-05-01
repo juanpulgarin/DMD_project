@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from matplotlib.lines import Line2D
 
 import Hamiltonian as Hamilton
 import constants as cst
@@ -117,12 +118,12 @@ def plot_population_field(t_eval,electric_field,k_list,solutions,limits,fout='')
         plt.show()
     return 0
 
-def plot_singular_values(sigma,truncado,fout=''):
+def plot_singular_values(sigma,rank,fout=''):
     fig, axs=plt.subplots(1, figsize=(6,4))
 
     axs.plot(sigma/sigma[0],'.',color='blue',label='Singular Values')
 
-    axs.axhline(y=truncado,ls='--',color='gray',label='cutoff')
+    axs.axhline(y=sigma[rank]/sigma[0],ls='--',color='gray',label='cutoff')
 
 
     axs.set_xlabel("index $i$",fontsize=15)
@@ -201,15 +202,37 @@ def plot_amplitudes_b(amplitudes_costum,fout=''):
         plt.show()
     return 0
 
-def plot_modes_vs_time():
+def plot_modes_vs_time(b_costum,index,limits,fout=''):
     fig, axs=plt.subplots(1, figsize=(6,4))
+
+    axs.plot(b_costum[index,:].real,color='blue',label=f"$\\Re \\left( e^{{ \\omega_{index+1}t }} \\right)$")
+    axs.plot(b_costum[index,:].imag,color='red', label=f"$\\Im \\left( e^{{ \\omega_{index+1}t }} \\right)$")
+
+    axs.legend(loc='best', fontsize=15,fancybox=True,framealpha=1.0)
+
+    axs.set_xlim(limits[0,0],limits[0,1])
+    axs.set_ylim(limits[1,0],limits[1,1])
+
+
+    axs.set_xlabel(f"snapshot",fontsize=15)
+    axs.set_ylabel("Amplitude (au)",fontsize=15)
+
+    axs.tick_params(axis="x", labelsize=15)
+    axs.tick_params(axis="y", labelsize=15)
+
+    axs.spines['top'].set_visible(False)
+    axs.spines['right'].set_visible(False)
+
+    if len(fout) > 0:
+        plt.savefig(fout+f'index={index}.png', bbox_inches='tight', transparent=True)
+        plt.savefig(fout+f'index={index}.pdf', bbox_inches='tight', transparent=True)
 
 def plot_modes_vs_grid(Φ,index,limits,kx,ky=None,dimension=1,fout=''):
     fig, axs=plt.subplots(1, figsize=(6,4))
 
     if dimension==1:
-        axs.plot(kx,Φ[:,index].real,color='blue',label=r"$\Re \{ \Phi_{{index+1}} \}$")
-        axs.plot(kx,Φ[:,index].imag,color='red',label=r"$\Im \{ \Phi_{{index+1}} \}$")
+        axs.plot(kx,Φ[:,index].real,color='blue',label=f"$\\Re \\left( \\Phi_{{ {index+1} }} \\right)$")
+        axs.plot(kx,Φ[:,index].imag,color='red',label=f"$\\Im \\left( \\Phi_{index+1} \\right)$")
 
         axs.legend(loc='best', fontsize=15,fancybox=True,framealpha=1.0)
 
@@ -227,8 +250,8 @@ def plot_modes_vs_grid(Φ,index,limits,kx,ky=None,dimension=1,fout=''):
         axs.spines['right'].set_visible(False)
 
         if len(fout) > 0:
-            plt.savefig(fout+'.png', bbox_inches='tight', transparent=True)
-            plt.savefig(fout+'.pdf', bbox_inches='tight', transparent=True)
+            plt.savefig(fout+f'index={index}.png', bbox_inches='tight', transparent=True)
+            plt.savefig(fout+f'index={index}.pdf', bbox_inches='tight', transparent=True)
 
     if dimension==2:
         vmax = np.max(Φ[:,:,index].real)
@@ -280,6 +303,106 @@ def plot_modes_vs_grid(Φ,index,limits,kx,ky=None,dimension=1,fout=''):
         if len(fout) > 0:
             plt.savefig(fout+'_imag.png', bbox_inches='tight', transparent=True)
             plt.savefig(fout+'_imag.pdf', bbox_inches='tight', transparent=True)
+
+def plot_comparison_data_1d(original_data,reconstruction_costum,index,limits,fout=''):
+    fig, axs=plt.subplots(1, figsize=(6,4))
+
+    axs.plot(original_data[index,:].real,'o',color='green',label='Original Data')
+    axs.plot(reconstruction_costum[index,:].real,'-',color='blue',label='DMD')
+
+    axs.legend(loc='best', title=f'$x_{{ {index+1} }}(t)$', fontsize=15,fancybox=True,framealpha=1.0)
+
+    axs.set_xlim(limits[0,0],limits[0,1])
+    axs.set_ylim(limits[1,0],limits[1,1])
+
+    axs.set_title("Real part",fontsize=15)
+    axs.set_ylabel(f'Amplitude (au)',fontsize=15)
+    axs.set_xlabel(f'Snapshot',fontsize=15)
+
+    axs.tick_params(axis="x", labelsize=15)
+    axs.tick_params(axis="y", labelsize=15)
+
+    axs.spines['top'].set_visible(False)
+    axs.spines['right'].set_visible(False)
+
+    if len(fout) > 0:
+        plt.savefig(fout+f'index={index}_real.png', bbox_inches='tight', transparent=True)
+        plt.savefig(fout+f'index={index}_real.pdf', bbox_inches='tight', transparent=True)
+
+
+    fig, axs=plt.subplots(1, figsize=(6,4))
+
+    axs.plot(original_data[index,:].imag,'o',color='orange',label='Original Data')
+    axs.plot(reconstruction_costum[index,:].imag,'-',color='red',label='DMD')
+
+    axs.legend(loc='best', title=f'$x_{{ {index+1} }}(t)$', fontsize=13,fancybox=True,framealpha=1.0)
+
+    axs.set_xlim(limits[0,0],limits[0,1])
+    axs.set_ylim(limits[1,0],limits[1,1])
+
+    axs.set_title("Imaginary part",fontsize=15)
+    axs.set_ylabel(f'Amplitude (au)',fontsize=15)
+    axs.set_xlabel(f'Snapshot',fontsize=15)
+
+    axs.tick_params(axis="x", labelsize=15)
+    axs.tick_params(axis="y", labelsize=15)
+
+    axs.spines['top'].set_visible(False)
+    axs.spines['right'].set_visible(False)
+
+    if len(fout) > 0:
+        plt.savefig(fout+f'index={index}_imag.png', bbox_inches='tight', transparent=True)
+        plt.savefig(fout+f'index={index}_imag.pdf', bbox_inches='tight', transparent=True)
+
+    return 0
+
+def plot_comparison_data_2d(original_data,reconstruction_costum,limits,fout=''):
+    fig, axs=plt.subplots(1, figsize=(6,4))
+
+    im = axs.imshow(original_data[:,:].real,cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic')
+    #axs.plot(reconstruction_costum[index,:].real,'-',color='blue',label='DMD')
+
+    axs.set_title("Real part (Original)",fontsize=15)
+    axs.set_ylabel(f'k (au)',fontsize=15)
+    axs.set_xlabel(f'Snapshot',fontsize=15)
+
+    axs.tick_params(axis="x", labelsize=15)
+    axs.tick_params(axis="y", labelsize=15)
+
+    cs = fig.colorbar(im)
+
+    cs.ax.tick_params(labelsize=15)
+
+    if len(fout) > 0:
+        plt.savefig(fout+"_original.png", bbox_inches='tight', transparent=True)
+        plt.savefig(fout+"_original.pdf", bbox_inches='tight', transparent=True)
+
+    fig, axs=plt.subplots(1, figsize=(6,4))
+
+    im = axs.imshow(reconstruction_costum[:,:].real,cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic')
+    #axs.plot(reconstruction_costum[index,:].real,'-',color='blue',label='DMD')
+
+    axs.set_title("Real part (DMD)",fontsize=15)
+    axs.set_ylabel(f'k (au)',fontsize=15)
+    axs.set_xlabel(f'Snapshot',fontsize=15)
+
+    axs.tick_params(axis="x", labelsize=15)
+    axs.tick_params(axis="y", labelsize=15)
+
+    cs = fig.colorbar(im)
+
+    cs.ax.tick_params(labelsize=15)
+
+    if len(fout) > 0:
+        plt.savefig(fout+"_DMD.png", bbox_inches='tight', transparent=True)
+        plt.savefig(fout+"_DMD.pdf", bbox_inches='tight', transparent=True)
+
+
+    return 0
+
+
+###Crear una funcion para hacer el plot de los modos en embeding, por ejemplo, mode[:,0], para ver en el eje-x real, eje-y imag, como una espcie de estrella
+
 
 # Function 3: Density matrix evolution
 def plot_density_matrix_evolution(J, k_list, delta, sigma, E0):
