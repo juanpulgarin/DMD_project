@@ -10,7 +10,7 @@ def custom_hankel_embedding(X, delay):
     ])
     return hankel_matrix
 
-def perform_dmd(H, rank=None, d=1, dt=1):
+def perform_dmd(H, rank=None, d=1, dt=1,tikhonov_regularization=None):
     #print(np.shape(H))
     X1 = H[:, :-1]
     X2 = H[:, 1:]
@@ -28,7 +28,18 @@ def perform_dmd(H, rank=None, d=1, dt=1):
         S_r  = S[:]
         Vh_r = Vh[:, :]
 
+    if tikhonov_regularization is not None:
+        #print(np.shape(X1))
+        norm_X = np.linalg.norm(X1)
+        #print(norm_X)
+
+        S_r = (
+                S_r**2 + tikhonov_regularization * norm_X
+            ) * (1. / (S_r + 0.000001 ) )
+
     Sigma_inv = np.diag(1 / (S_r + 0.000001 ))
+
+
     A_tilde = U_r.T @ X2 @ Vh_r @ Sigma_inv
     eigvals, W = LA.eig(A_tilde)
     #Phi = X2 @ Vh_r @ Sigma_inv @ W

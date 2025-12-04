@@ -150,13 +150,15 @@ def plot_singular_values(sigma,rank,fout=''):
 def plot_eigenvalues(mu,fout=''):
     fig, axs=plt.subplots(1, figsize=(6,4))
 
+    axs.plot([0.],[0.],'o',color='black')
+
     axs.plot(mu.real,mu.imag,'.',color='red')
 
     theta = np.linspace(0, 2 * np.pi, 300)
     x = np.cos(theta)
     y = np.sin(theta)
     axs.plot(x, y, 'k--')
-    axs.plot([0.],[0.],'o',color='black')
+
 
     axs.set_xlim(-1.2,1.2)
     axs.set_ylim(-1.2,1.2)
@@ -272,7 +274,7 @@ def plot_modes_vs_grid(Φ,index,limits,kx,ky=None,dimension=1,fout=''):
 
         cs = fig.colorbar(im)
 
-        cs.axs.tick_params(labelsize=15)
+        cs.ax.tick_params(labelsize=15)
 
         if len(fout) > 0:
             plt.savefig(fout+'_real.png', bbox_inches='tight', transparent=True)
@@ -298,7 +300,7 @@ def plot_modes_vs_grid(Φ,index,limits,kx,ky=None,dimension=1,fout=''):
 
         cs = fig.colorbar(im)
 
-        cs.axs.tick_params(labelsize=15)
+        cs.ax.tick_params(labelsize=15)
 
         if len(fout) > 0:
             plt.savefig(fout+'_imag.png', bbox_inches='tight', transparent=True)
@@ -307,8 +309,8 @@ def plot_modes_vs_grid(Φ,index,limits,kx,ky=None,dimension=1,fout=''):
 def plot_comparison_data_1d(original_data,reconstruction_costum,index,limits,fout=''):
     fig, axs=plt.subplots(1, figsize=(6,4))
 
-    axs.plot(original_data[index,:].real,'o',color='green',label='Original Data')
     axs.plot(reconstruction_costum[index,:].real,'-',color='blue',label='DMD')
+    axs.plot(original_data[index,:].real,'--',color='red',label='Original Data')
 
     axs.legend(loc='best', title=f'$x_{{ {index+1} }}(t)$', fontsize=15,fancybox=True,framealpha=1.0)
 
@@ -332,8 +334,8 @@ def plot_comparison_data_1d(original_data,reconstruction_costum,index,limits,fou
 
     fig, axs=plt.subplots(1, figsize=(6,4))
 
-    axs.plot(original_data[index,:].imag,'o',color='orange',label='Original Data')
-    axs.plot(reconstruction_costum[index,:].imag,'-',color='red',label='DMD')
+    axs.plot(reconstruction_costum[index,:].imag,'-',color='green',label='DMD')
+    axs.plot(original_data[index,:].imag,'--',color='orange',label='Original Data')
 
     axs.legend(loc='best', title=f'$x_{{ {index+1} }}(t)$', fontsize=13,fancybox=True,framealpha=1.0)
 
@@ -356,18 +358,51 @@ def plot_comparison_data_1d(original_data,reconstruction_costum,index,limits,fou
 
     return 0
 
-def plot_comparison_data_2d(original_data,reconstruction_costum,limits,fout=''):
-    fig, axs=plt.subplots(1, figsize=(6,4))
+def plot_comparison_data_2d(original_data,reconstruction_costum,kx,time,limits,kind='Real',fout=''):
 
-    im = axs.imshow(original_data[:,:].real,cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic')
-    #axs.plot(reconstruction_costum[index,:].real,'-',color='blue',label='DMD')
+    extent = 0, np.shape(original_data[:,:])[1], np.min(kx), np.max(kx)
 
-    axs.set_title("Real part (Original)",fontsize=15)
-    axs.set_ylabel(f'k (au)',fontsize=15)
-    axs.set_xlabel(f'Snapshot',fontsize=15)
+    fig, axs=plt.subplots(1,2, figsize=(12,4))
 
-    axs.tick_params(axis="x", labelsize=15)
-    axs.tick_params(axis="y", labelsize=15)
+    if kind == "Real" or kind == "real":
+        im = axs[0].imshow(np.real(original_data[:,:]),cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic',extent=extent)
+    if kind == "Imag" or kind == "imag":
+        im = axs[0].imshow(np.imag(original_data[:,:]),cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic',extent=extent)
+    if kind == "Abs" or kind == "abs":
+        im = axs[0].imshow(np.abs(original_data[:,:]),cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic',extent=extent)
+
+    axs[0].set_title(f"{kind} part (Original)",fontsize=15)
+    axs[0].set_ylabel(f'k (au)',fontsize=15)
+    axs[0].set_xlabel(f'Snapshot',fontsize=15)
+
+    axs[0].set_xlim(limits[0,0],limits[0,1])
+    axs[0].set_ylim(limits[1,0],limits[1,1])
+
+    axs[0].tick_params(axis="x", labelsize=15)
+    axs[0].tick_params(axis="y", labelsize=15)
+
+    cs = fig.colorbar(im)
+
+    cs.ax.tick_params(labelsize=15)
+
+    extent = 0, np.shape(reconstruction_costum[:,:])[1], np.min(kx), np.max(kx)
+
+    if kind == "Real" or kind == "real":
+        im = axs[1].imshow(np.real(reconstruction_costum[:,:]),cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic',extent=extent)
+    if kind == "Imag" or kind == "imag":
+        im = axs[1].imshow(np.imag(reconstruction_costum[:,:]),cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic',extent=extent)
+    if kind == "Abs" or kind == "abs":
+        im = axs[1].imshow(np.abs(reconstruction_costum[:,:]),cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic',extent=extent)
+
+    axs[1].set_title(f"{kind} part (DMD)",fontsize=15)
+    axs[1].set_ylabel(f'k (au)',fontsize=15)
+    axs[1].set_xlabel(f'Snapshot',fontsize=15)
+
+    axs[1].set_xlim(limits[0,0],limits[0,1])
+    axs[1].set_ylim(limits[1,0],limits[1,1])
+
+    axs[1].tick_params(axis="x", labelsize=15)
+    axs[1].tick_params(axis="y", labelsize=15)
 
     cs = fig.colorbar(im)
 
@@ -377,26 +412,78 @@ def plot_comparison_data_2d(original_data,reconstruction_costum,limits,fout=''):
         plt.savefig(fout+"_original.png", bbox_inches='tight', transparent=True)
         plt.savefig(fout+"_original.pdf", bbox_inches='tight', transparent=True)
 
+    return 0
+
+def plot_frequencies_1d(reconstruction_costum,index,frequency,limits,fout=''):
     fig, axs=plt.subplots(1, figsize=(6,4))
 
-    im = axs.imshow(reconstruction_costum[:,:].real,cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic')
-    #axs.plot(reconstruction_costum[index,:].real,'-',color='blue',label='DMD')
+    axs.plot(frequency,np.real(reconstruction_costum[index,:]),'-',color='blue',label='Real')
+    axs.plot(frequency,np.imag(reconstruction_costum[index,:]),'--',color='red',label='Imag')
 
-    axs.set_title("Real part (DMD)",fontsize=15)
-    axs.set_ylabel(f'k (au)',fontsize=15)
-    axs.set_xlabel(f'Snapshot',fontsize=15)
+    axs.legend(loc='best', title=f'$x_{{ {index+1} }}(t)$', fontsize=13,fancybox=True,framealpha=1.0)
+
+    axs.set_xlim(limits[0,0],limits[0,1])
+    axs.set_ylim(limits[1,0],limits[1,1])
+
+    axs.set_ylabel(f'Amplitude (au)',fontsize=15)
+    axs.set_xlabel(f'Frequency',fontsize=15)
 
     axs.tick_params(axis="x", labelsize=15)
     axs.tick_params(axis="y", labelsize=15)
+
+    axs.spines['top'].set_visible(False)
+    axs.spines['right'].set_visible(False)
+
+    if len(fout) > 0:
+        plt.savefig(fout+f'index={index}.png', bbox_inches='tight', transparent=True)
+        plt.savefig(fout+f'index={index}.pdf', bbox_inches='tight', transparent=True)
+
+    return 0
+
+def plot_frequencies_2d(reconstruction_costum,kx,frequency,limits,fout=''):
+
+    extent = np.min(frequency), np.max(frequency), np.min(kx), np.max(kx)
+
+    fig, axs=plt.subplots(1,2, figsize=(12,4))
+
+    im = axs[0].imshow(np.real(reconstruction_costum[:,:]),cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic',extent=extent)
+
+
+    axs[0].set_title(f"Real part",fontsize=15)
+    axs[0].set_ylabel(f'k (au)',fontsize=15)
+    axs[0].set_xlabel(f'Frequency',fontsize=15)
+
+    axs[0].set_xlim(limits[0,0],limits[0,1])
+    axs[0].set_ylim(limits[1,0],limits[1,1])
+
+    axs[0].tick_params(axis="x", labelsize=15)
+    axs[0].tick_params(axis="y", labelsize=15)
+
+    cs = fig.colorbar(im)
+
+    cs.ax.tick_params(labelsize=15)
+
+
+    im = axs[1].imshow(np.imag(reconstruction_costum[:,:]),cmap=plt.cm.gnuplot,aspect='auto',interpolation='bicubic',extent=extent)
+
+
+    axs[1].set_title(f"Imag part",fontsize=15)
+    axs[1].set_ylabel(f'k (au)',fontsize=15)
+    axs[1].set_xlabel(f'Frequency',fontsize=15)
+
+    axs[1].set_xlim(limits[0,0],limits[0,1])
+    axs[1].set_ylim(limits[1,0],limits[1,1])
+
+    axs[1].tick_params(axis="x", labelsize=15)
+    axs[1].tick_params(axis="y", labelsize=15)
 
     cs = fig.colorbar(im)
 
     cs.ax.tick_params(labelsize=15)
 
     if len(fout) > 0:
-        plt.savefig(fout+"_DMD.png", bbox_inches='tight', transparent=True)
-        plt.savefig(fout+"_DMD.pdf", bbox_inches='tight', transparent=True)
-
+        plt.savefig(fout+"_original.png", bbox_inches='tight', transparent=True)
+        plt.savefig(fout+"_original.pdf", bbox_inches='tight', transparent=True)
 
     return 0
 
